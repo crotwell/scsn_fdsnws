@@ -1,6 +1,7 @@
 import datetime
 import simpledali
 import pathlib
+import re
 
 class RingserverArchive(object):
     def __init__(self, config):
@@ -22,7 +23,16 @@ class RingserverArchive(object):
             filelist.append(search_hour.strftime(pattern))
             search_hour += hour
         return filelist
+    def validate(self, net, sta, loc, chan, starttime, endtime):
+        return isAlphaNum(net) and len(net) <= 2 \
+            and isAlphaNum(sta) and len(sta) <=5 \
+            and isAlphaNum(loc) and len(loc)<=2 \
+            and isAlphaNum(chan) and len(chan)<=3 \
+            and isinstance(starttime, datetime.datetime) \
+            and isinstance(endtime, datetime.datetime)
     def query(self, net, sta, loc, chan, starttime, endtime):
+        if not self.validate(net, sta, loc, chan, starttime, endtime):
+            raise Exception("Illegal parameters")
         file_list = self.files_for_request(net, sta, loc, chan, starttime, endtime)
         records = []
         outbytes = []
@@ -55,3 +65,8 @@ class RingserverArchive(object):
                 ring_conf["port"] = 80
             if "host" not in ring_conf:
                 ring_conf["host"] = "127.0.0.1"
+
+alphanumRE = re.compile(r'[A-Z0-9]*$')
+
+def isAlphaNum(s):
+    return alphanumRE.match(s) is not None
