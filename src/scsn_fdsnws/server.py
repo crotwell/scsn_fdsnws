@@ -40,7 +40,7 @@ class DataSelect(object):
     def __init__(self, archive):
         self.archive = archive
     @cherrypy.expose
-    def index(self, net, sta, loc, cha, starttime, endtime, format="miniseed", nodata="204"):
+    def index(self, net, sta, cha, starttime, endtime, loc="", format="miniseed", nodata="204"):
         if format != "miniseed":
             raise Exception(f"only miniseed format is accepted.: {format}")
 
@@ -57,8 +57,9 @@ class DataSelect(object):
         start = datetime.datetime.fromisoformat(starttime)
         end = datetime.datetime.fromisoformat(endtime)
         record_bytes = self.archive.query(net, sta, loc, cha, start, end)
-        print(f"Len {net} {sta} {loc} {cha} {starttime} {endtime} {len(record_bytes)}")
+        cherrypy.log(f"Len {net} {sta} {loc} {cha} {starttime} {endtime} {len(record_bytes)}")
         if len(record_bytes) > 0:
+            cherrypy.log(f"found {len(record_bytes)} bytes")
             buffer = io.BytesIO()
             for rb in record_bytes:
                 buffer.write(rb)
@@ -70,11 +71,11 @@ class DataSelect(object):
             cherrypy.response.headers['Content-Length'] = len(out)
             return out
         else:
+            cherrypy.log(f"No data, return {nodata}")
             if nodata == "404":
                 cherrypy.response.status = 404
             else:
                 cherrypy.response.status = 204
-            print(f"No data, return {nodata}")
             return "Not Found"
 
 
