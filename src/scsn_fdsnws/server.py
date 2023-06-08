@@ -103,6 +103,8 @@ def main():
     args.conf.close()
 
     archive = RingserverArchive(ringconf)
+    cherrypy.config.update({'server.socket_port': 9090})
+    cherrypy.config.update({'server.socket_host': "0.0.0.0"})
     conf = {
         '/': {
             'tools.sessions.on': True,
