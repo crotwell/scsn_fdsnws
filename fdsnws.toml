@@ -1,0 +1,37 @@
+[mseed]
+datadir='/data/scsn/mseed'
+
+# MSEED Write pattern, usage similar to MSeedWrite in ringserver
+# %n - network
+# %s - station
+# %l - location
+# %c - channel
+# %Y - year
+# %j - day of year
+# %H - hour
+#MSeedWrite='/data/scsn/www/mseed/%n/%s/%Y/%j/%n.%s.%l.%c.%Y.%j.%H'
+MSeedWrite='mseed/%n/%s/%Y/%j/%n.%s.%l.%c.%Y.%j.%H'
+
+[ringserver]
+# datalink host, defaults to localhost
+host='localhost'
+# datalink port, defaults to 16000
+port=15003
+# or via websockets
+websocket='ws://localhost:6383/datalink'
+
+# Match regular expression pattern on stream ids, ex '.*/MSEED'
+match='.*/MSEED'
+
+[datalink]
+# datalink host, defaults to localhost
+host='localhost'
+# datalink port, defaults to 16000
+port=16000
+# or via websockets
+websocket='ws://localhost:16000/datalink'
+
+# Match regular expression pattern on stream ids, ex '.*/MSEED'
+match='.*/MSEED'
+
+[jsonl]

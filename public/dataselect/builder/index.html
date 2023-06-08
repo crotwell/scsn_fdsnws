@@ -1,0 +1,85 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="../flavicon.png" />
+    <title>SCSN FDSN DataSelect URL Builder</title>
+  </head>
+  <body>
+
+      <h3><a href="https://github.com/crotwell/scsn_fdsnws" class="">SCSN FDSN DataSelect URL Builder</a> </h3>
+
+      <div>
+        <label>Code: </label><sp-channel-code-input network="CO" station="CASEE" location="00" channel="HHZ"/>
+      </div>
+      <div>
+        <label>Time: </label><sp-timerange duration="900" prev-next="true"/>
+      </div>
+      <button class="submit">Give it now!</button>
+
+      <div>
+        <h5>Output:</h5>
+        <div id="queryurl">
+        </div>
+        <sp-organized-display></sp-organized-display>
+        <p id="output"></p>
+      </div>
+
+
+  <script type="module">
+    import {
+      components,
+      fdsnstation,
+      stationxml,
+      fdsndataselect
+    } from '../seisplotjs_3.0.0_standalone.mjs';
+    import * as sp from '../seisplotjs_3.0.0_standalone.mjs';
+
+    const goBtn = document.querySelector('button.submit');
+
+    const outputArea = document.querySelector('#output');
+    const urlArea = document.querySelector('#queryurl');
+    const codeInput = document.querySelector('sp-channel-code-input');
+    const rangeInput = document.querySelector('sp-timerange');
+    const orgDisp = document.querySelector('sp-organized-display');
+
+    function doUpdateCodes() {
+      urlArea.textContent = '';
+      const query = new fdsndataselect.DataSelectQuery();
+      query.host("localhost");
+      query.port(8080);
+      query.networkCode(codeInput.network);
+      query.stationCode(codeInput.station);
+      query.locationCode(codeInput.location);
+      query.channelCode(codeInput.channel);
+      query.timeRange(rangeInput.getTimeRange())
+      const a = document.createElement('a');
+      const url = query.formURL();
+      a.setAttribute("href", url);
+      a.textContent = url;
+      urlArea.appendChild(a);
+      return query;
+    }
+    goBtn.addEventListener("click", () => {
+      const query = doUpdateCodes();
+      query.querySeismograms().then( seismograms => {
+        let seisConfig = new sp.seismographconfig.SeismographConfig();
+        //seisConfig.linkedAmplitudeScale = new sp.scale.LinkedAmplitudeScale();
+        seisConfig.linkedAmplitudeScale = new sp.scale.IndividualAmplitudeScale();
+        seisConfig.doGain = true;
+        seisConfig.doRmean = true;
+        seisConfig.isRelativeTime = false;
+        orgDisp.seismographConfig = seisConfig;
+        const sddList = seismograms.map(s => sp.seismogram.SeismogramDisplayData.fromSeismogram(s));
+        orgDisp.seisData = sddList;
+      });
+    });
+    codeInput.addEventListener("change", doUpdateCodes);
+    rangeInput.updateCallback = (timeRange) => {
+      outputArea.textContent = `Range: ${timeRange.start.toISO()} to ${timeRange.end.toISO()}`;
+      doUpdateCodes();
+    }
+    doUpdateCodes();
+  </script>
+  </body>
+</html>
