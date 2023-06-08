@@ -1,4 +1,6 @@
 import cherrypy
+from cherrypy.process.plugins import Daemonizer
+
 import argparse
 import datetime
 import io
@@ -89,6 +91,9 @@ def do_parseargs():
         "-v", "--verbose", help="increase output verbosity", action="store_true"
     )
     parser.add_argument(
+        "--daemon", help="run as daemon via fork", action="store_true"
+    )
+    parser.add_argument(
         "-c",
         "--conf",
         required=False,
@@ -119,8 +124,12 @@ def main():
     cherrypy.tree.mount(DataSelect(archive), '/fdsnws/dataselect/1/query', conf)
     cherrypy.tree.mount(Nav(), '/', conf)
 
-    cherrypy.engine.start()
-    cherrypy.engine.block()
+    if args.daemon:
+        d = Daemonizer(cherrypy.engine)
+        d.subscribe()
+    else:
+        cherrypy.engine.start()
+        cherrypy.engine.block()
 
 if __name__ == '__main__':
     main()
