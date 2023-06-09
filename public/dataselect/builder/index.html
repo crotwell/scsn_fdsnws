@@ -21,8 +21,8 @@
         <h5>Output:</h5>
         <div id="queryurl">
         </div>
-        <sp-organized-display></sp-organized-display>
         <p id="output"></p>
+        <sp-organized-display></sp-organized-display>
       </div>
 
 
@@ -45,9 +45,11 @@
 
     function doUpdateCodes() {
       urlArea.textContent = '';
+      orgDisp.seisData = [];
       const query = new fdsndataselect.DataSelectQuery();
       query.host("localhost");
-      query.port(8080);
+      query.port(9090);
+      query.nodata(404);
       query.networkCode(codeInput.network);
       query.stationCode(codeInput.station);
       query.locationCode(codeInput.location);
@@ -72,6 +74,11 @@
         orgDisp.seismographConfig = seisConfig;
         const sddList = seismograms.map(s => sp.seismogram.SeismogramDisplayData.fromSeismogram(s));
         orgDisp.seisData = sddList;
+        if (sddList.length == 0) {
+          outputArea.textContent = `Server did not return any data.`;
+        }
+      }).catch(e => {
+        outputArea.textContent = `Server response was not OK: ${e}`
       });
     });
     codeInput.addEventListener("change", doUpdateCodes);
