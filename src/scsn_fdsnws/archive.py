@@ -12,6 +12,8 @@ class RingserverArchive(object):
         pattern = self.config["mseed"]["MSeedWrite"]
         if pattern is None:
             raise Exception("MSeedWrite is not in config")
+        if loc == "--":
+            loc = ""
         pattern = pattern.replace("%n", net)
         pattern = pattern.replace("%s", sta)
         pattern = pattern.replace("%l", loc)
@@ -26,7 +28,7 @@ class RingserverArchive(object):
     def validate(self, net, sta, loc, chan, starttime, endtime):
         return isAlphaNum(net) and len(net) <= 2 \
             and isAlphaNum(sta) and len(sta) <=5 \
-            and isAlphaNum(loc) and len(loc)<=2 \
+            and isAlphaNum(loc) and len(loc) <=2 \
             and isAlphaNum(chan) and len(chan)<=3 \
             and isinstance(starttime, datetime.datetime) \
             and isinstance(endtime, datetime.datetime)
@@ -38,7 +40,7 @@ class RingserverArchive(object):
         outbytes = []
         for mseedfile in file_list:
             f = pathlib.Path(mseedfile)
-            if not f.parent.exists():
+            if not f.parent.parent.exists():
                 raise Exception(f"Data dir for {f} doesn't exist!")
             if f.exists():
                 with open(f, "rb") as infile:
@@ -66,7 +68,7 @@ class RingserverArchive(object):
             if "host" not in ring_conf:
                 ring_conf["host"] = "127.0.0.1"
 
-alphanumRE = re.compile(r'[A-Z0-9]*$')
+alphanumRE = re.compile(r'[A-Z0-9-]*$')
 
 def isAlphaNum(s):
     return alphanumRE.match(s) is not None
