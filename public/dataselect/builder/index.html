@@ -83,7 +83,6 @@
     });
     codeInput.addEventListener("change", doUpdateCodes);
     rangeInput.updateCallback = (timeRange) => {
-      outputArea.textContent = `Range: ${timeRange.start.toISO()} to ${timeRange.end.toISO()}`;
       doUpdateCodes();
     }
     doUpdateCodes();
