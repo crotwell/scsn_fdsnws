@@ -48,7 +48,7 @@
       urlArea.textContent = '';
       orgDisp.seisData = [];
       const query = new fdsndataselect.DataSelectQuery();
-      query.host("localhost");
+      query.host(location.hostname);
       query.port(9090);
       query.nodata(404);
       query.networkCode(codeInput.network);
