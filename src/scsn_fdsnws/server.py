@@ -39,8 +39,10 @@ class Nav(object):
         </html>"""
 
 class DataSelect(object):
-    def __init__(self, archive):
+    def __init__(self, archive, conf={}):
         self.archive = archive
+        self.conf = self.configure_defaults(conf)
+        self.max_timerange = datetime.timedelta(hours=int(self.conf["dataselect"]["maxqueryhours"]))
     @cherrypy.expose
     def index(self, net, sta, cha, starttime, endtime, loc="", format="miniseed", nodata="204"):
         if format != "miniseed":
@@ -58,6 +60,10 @@ class DataSelect(object):
         endtime = f"{endtime}+00:00"
         start = datetime.datetime.fromisoformat(starttime)
         end = datetime.datetime.fromisoformat(endtime)
+        if end - start > self.max_timerange:
+            url = cherrypy.url(qs=cherrypy.request.query_string)
+            cherrypy.response.status = 413
+            return f"<html><body><h3>Request time window too large:</h3>\n<p>Max is {self.max_timerange}.</p>\n<a href={url}>{url}</a></body></html>"
         record_bytes = self.archive.query(net, sta, loc, cha, start, end)
         cherrypy.log(f"Len {net} {sta} {loc} {cha} {starttime} {endtime} {len(record_bytes)}")
         if len(record_bytes) > 0:
@@ -78,7 +84,23 @@ class DataSelect(object):
                 cherrypy.response.status = 404
             else:
                 cherrypy.response.status = 204
-            return "Not Found"
+            url = cherrypy.url(qs=cherrypy.request.query_string)
+            return f"<html><body><h3>No data found for request:</h3>\n<a href={url}>{url}</a></body></html>"
+
+    def configure_defaults(self, conf):
+        if not "dataselect" in conf:
+            conf["dataselect"] = {}
+        dataselect_conf = conf["dataselect"]
+        if "maxqueryhours" not in dataselect_conf:
+            dataselect_conf["maxqueryhours"] = "24"
+        if "ringserver" in conf:
+            ring_conf = conf["ringserver"]
+            if "port" not in ring_conf:
+                ring_conf["port"] = 80
+            if "host" not in ring_conf:
+                ring_conf["host"] = "127.0.0.1"
+        return conf
+
 
 
 
@@ -121,7 +143,7 @@ def main():
             'tools.staticdir.dir': './public'
         }
     }
-    cherrypy.tree.mount(DataSelect(archive), '/fdsnws/dataselect/1/query', conf)
+    cherrypy.tree.mount(DataSelect(archive, ringconf), '/fdsnws/dataselect/1/query', conf)
     cherrypy.tree.mount(Nav(), '/', conf)
 
     if args.daemon:
