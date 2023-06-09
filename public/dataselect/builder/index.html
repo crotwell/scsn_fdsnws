@@ -44,6 +44,7 @@
     const orgDisp = document.querySelector('sp-organized-display');
 
     function doUpdateCodes() {
+      outputArea.textContent = '';
       urlArea.textContent = '';
       orgDisp.seisData = [];
       const query = new fdsndataselect.DataSelectQuery();
