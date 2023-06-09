@@ -1,3 +1,6 @@
+[dataselect]
+maxqueryhours=25
+
 [mseed]
 datadir='/data/scsn/mseed'
 
