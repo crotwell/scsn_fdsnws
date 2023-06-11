@@ -72,7 +72,7 @@ class DataSelect(object):
 
     @cherrypy.expose
     def echo(self, net, sta, loc, cha, starttime, endtime):
-        cherrypy.log(f"echo {msg}")
+        cherrypy.log(f"echo {net}.{sta}.{loc}.{cha} {starttime} {endtime}")
         return f"""<html>
 
           <head></head>
