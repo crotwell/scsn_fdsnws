@@ -72,6 +72,7 @@ class DataSelect(object):
 
     @cherrypy.expose
     def echo(self, msg):
+        cherrypy.log(f"echo {msg}")
         return f"""<html>
 
           <head></head>
