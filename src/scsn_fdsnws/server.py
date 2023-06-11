@@ -43,8 +43,21 @@ class DataSelect(object):
         self.archive = archive
         self.conf = self.configure_defaults(conf)
         self.max_timerange = datetime.timedelta(hours=int(self.conf["dataselect"]["maxqueryhours"]))
+
     @cherrypy.expose
-    def index(self, net, sta, cha, starttime, endtime, loc="", format="miniseed", nodata="204"):
+    def index(self):
+        return """<html>
+
+          <head></head>
+
+          <body>
+            <h3>SCSN FDSNWS service</h3>
+
+          </body>
+
+        </html>"""
+    @cherrypy.expose
+    def query(self, net, sta, cha, starttime, endtime, loc="", format="miniseed", nodata="204"):
         if format != "miniseed":
             raise Exception(f"only miniseed format is accepted.: {format}")
 
@@ -143,7 +156,7 @@ def main():
             'tools.staticdir.dir': './public'
         }
     }
-    cherrypy.tree.mount(DataSelect(archive, ringconf), '/fdsnws/dataselect/1/query', conf)
+    cherrypy.tree.mount(DataSelect(archive, ringconf), '/fdsnws/dataselect/1', conf)
     cherrypy.tree.mount(Nav(), '/', conf)
 
     if args.daemon:
