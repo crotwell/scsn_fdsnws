@@ -71,7 +71,7 @@ class DataSelect(object):
         </html>"""
 
     @cherrypy.expose
-    def echo(self, msg):
+    def echo(self, net, sta, loc, cha, starttime, endtime):
         cherrypy.log(f"echo {msg}")
         return f"""<html>
 
@@ -79,7 +79,7 @@ class DataSelect(object):
 
           <body>
             <h3>SCSN FDSNWS service</h3>
-            <h3>{msg}</h3>
+            <h3>{net}.{sta}.{loc}.{cha} {starttime} {endtime}</h3>
           </body>
 
         </html>"""
