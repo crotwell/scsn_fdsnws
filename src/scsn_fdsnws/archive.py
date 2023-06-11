@@ -2,6 +2,7 @@ import datetime
 import simpledali
 import pathlib
 import re
+import cherrypy
 
 class RingserverArchive(object):
     def __init__(self, config):
@@ -40,6 +41,7 @@ class RingserverArchive(object):
         outbytes = []
         for mseedfile in file_list:
             f = pathlib.Path(mseedfile)
+            cherrypy.log(f"load from {f}")
             if not f.parent.parent.exists():
                 raise Exception(f"Data dir for {f} doesn't exist!")
             if f.exists():
