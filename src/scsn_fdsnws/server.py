@@ -56,6 +56,33 @@ class DataSelect(object):
           </body>
 
         </html>"""
+
+    @cherrypy.expose
+    def version(self):
+        return f"""<html>
+
+          <head></head>
+
+          <body>
+            <h3>SCSN FDSNWS service</h3>
+            <h3>0.0.1</h3>
+          </body>
+
+        </html>"""
+
+    @cherrypy.expose
+    def echo(self, msg):
+        return f"""<html>
+
+          <head></head>
+
+          <body>
+            <h3>SCSN FDSNWS service</h3>
+            <h3>{msg}</h3>
+          </body>
+
+        </html>"""
+
     @cherrypy.expose
     def query(self, net, sta, cha, starttime, endtime, loc="", format="miniseed", nodata="204"):
         cherrypy.log(f"query {net}.{sta}.{loc}.{cha} {starttime} {endtime}")
