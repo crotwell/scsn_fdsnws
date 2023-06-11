@@ -58,6 +58,7 @@ class DataSelect(object):
         </html>"""
     @cherrypy.expose
     def query(self, net, sta, cha, starttime, endtime, loc="", format="miniseed", nodata="204"):
+        cherrypy.log(f"query {net}.{sta}.{loc}.{cha} {starttime} {endtime}")
         if format != "miniseed":
             raise Exception(f"only miniseed format is accepted.: {format}")
 
