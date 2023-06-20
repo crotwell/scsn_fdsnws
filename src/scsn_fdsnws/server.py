@@ -7,6 +7,7 @@ import io
 import os
 import sys
 from .archive import RingserverArchive
+from .dataselect import DataSelectWebService
 
 
 # tomllib is std in python > 3.11 so do conditional import
@@ -84,50 +85,6 @@ class DataSelect(object):
 
         </html>"""
 
-    @cherrypy.expose
-    def query(self, net, sta, cha, starttime, endtime, loc="", format="miniseed", nodata="204"):
-        cherrypy.log(f"query {net}.{sta}.{loc}.{cha} {starttime} {endtime}")
-        if format != "miniseed":
-            raise Exception(f"only miniseed format is accepted.: {format}")
-
-        if starttime.endswith(".000"):
-            starttime = starttime[:-4]
-        if starttime.endswith("Z"):
-            starttime = starttime[:-1]
-        starttime = f"{starttime}+00:00"
-        if endtime.endswith(".000"):
-            endtime = endtime[:-4]
-        if endtime.endswith("Z"):
-            endtime = endtime[:-1]
-        endtime = f"{endtime}+00:00"
-        start = datetime.datetime.fromisoformat(starttime)
-        end = datetime.datetime.fromisoformat(endtime)
-        if end - start > self.max_timerange:
-            url = cherrypy.url(qs=cherrypy.request.query_string)
-            cherrypy.response.status = 413
-            return f"<html><body><h3>Request time window too large:</h3>\n<p>Max is {self.max_timerange}.</p>\n<a href={url}>{url}</a></body></html>"
-        record_bytes = self.archive.query(net, sta, loc, cha, start, end)
-        cherrypy.log(f"Len {net} {sta} {loc} {cha} {starttime} {endtime} {len(record_bytes)}")
-        if len(record_bytes) > 0:
-            cherrypy.log(f"found {len(record_bytes)} bytes")
-            buffer = io.BytesIO()
-            for rb in record_bytes:
-                buffer.write(rb)
-            out = buffer.getvalue()
-
-            cherrypy.response.headers['Content-Type'] = 'application/vnd.fdsn.mseed'
-            outname = f"{net}_{sta}_{loc}_{cha}.mseed"
-            cherrypy.response.headers['Content-Disposition'] = f'attachment; filename="{outname}"'
-            cherrypy.response.headers['Content-Length'] = len(out)
-            return out
-        else:
-            cherrypy.log(f"No data, return {nodata}")
-            if nodata == "404":
-                cherrypy.response.status = 404
-            else:
-                cherrypy.response.status = 204
-            url = cherrypy.url(qs=cherrypy.request.query_string)
-            return f"<html><body><h3>No data found for request:</h3>\n<a href={url}>{url}</a></body></html>"
 
     def configure_defaults(self, conf):
         if not "dataselect" in conf:
@@ -176,16 +133,28 @@ def main():
     cherrypy.config.update({'server.socket_port': 9090})
     cherrypy.config.update({'server.socket_host': "0.0.0.0"})
     conf = {
-        '/': {
-            'tools.sessions.on': True,
-            'tools.staticdir.root': os.path.abspath(os.getcwd())
-        },
-        '/static': {
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir': './public'
+            '/': {
+                'tools.sessions.on': True,
+                'tools.staticdir.root': os.path.abspath(os.getcwd())
+            },
+            '/static': {
+                'tools.staticdir.on': True,
+                'tools.staticdir.dir': './public'
+            },
+            '/fdsnws': {
+                'tools.staticdir.on': True,
+                'tools.staticdir.dir': './public'
+            }
         }
-    }
-    cherrypy.tree.mount(DataSelect(archive, ringconf), '/fdsnws/dataselect/1', conf)
+    cherrypy.tree.mount(DataSelectWebService(archive, ringconf),
+                        '/fdsnws/dataselect/1/query',
+                        {'/': {
+                                'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+                                'tools.trailing_slash.on': False,
+                            }
+                        }
+                        )
+    #cherrypy.tree.mount(DataSelect(archive, ringconf), '/fdsnws/dataselect/1', conf)
     cherrypy.tree.mount(Nav(), '/', conf)
 
     if args.daemon:
