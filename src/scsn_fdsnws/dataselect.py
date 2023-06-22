@@ -23,12 +23,9 @@ class DataSelectWebService(object):
         if len(valid_params) == 2:
             cherrypy.response.status = valid_params[1]
             return valid_params[0]
-        cherrypy.log(f"got {len(valid_params)} params")
         net, sta, loc, cha, start, end, format, nodata = valid_params
         record_bytes = self.archive.query(net, sta, loc, cha, start, end)
-        cherrypy.log(f"Len {net} {sta} {loc} {cha} {start} {end} {len(record_bytes)}")
         if len(record_bytes) > 0:
-            cherrypy.log(f"found {len(record_bytes)} bytes")
             buffer = io.BytesIO()
             for rb in record_bytes:
                 buffer.write(rb)
