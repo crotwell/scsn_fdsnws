@@ -32,6 +32,7 @@ class DataSelectWebService(object):
             out = buffer.getvalue()
 
             cherrypy.response.headers['Content-Type'] = 'application/vnd.fdsn.mseed'
+            cherrypy.response.headers['Access-Control-Allow-Origin'] = '*'
             outname = f"{net}_{sta}_{loc}_{cha}_{self.filize_datetime(start)}.mseed"
             cherrypy.response.headers['Content-Disposition'] = f'attachment; filename="{outname}"'
             cherrypy.response.headers['Content-Length'] = len(out)
