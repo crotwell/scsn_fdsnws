@@ -53,7 +53,6 @@ class RingserverArchive(object):
                         msr = simpledali.unpackMiniseedRecord(bytedata)
 
                         if not (msr.starttime() > endtime or msr.endtime() < starttime):
-                            print(f"Found: {msr.starttime()}")
                             outbytes.append(bytedata)
         return outbytes
 

@@ -48,18 +48,18 @@ class DataSelectWebService(object):
             self.form_error_html(status, f"<h3>No data found for request:</h3>\n")
 
 
+    @cherrypy.tools.accept(media='application/vnd.fdsn.mseed')
     def POST(self, **params):
-        some_string = ''.join(random.sample(string.hexdigits, int(length)))
-        cherrypy.session['mystring'] = some_string
-        return some_string
+        print(f"POST {len(params)}")
+        self.form_error_html(500, f"<h3>No implement POST</h3>")
 
 
     def PUT(self, another_string):
-        cherrypy.session['mystring'] = another_string
+        self.form_error_html(500, f"<h3>No implement PUT</h3>")
 
 
     def DELETE(self):
-        cherrypy.session.pop('mystring', None)
+        self.form_error_html(500, f"<h3>No implement DELETE</h3>")
 
     def validate_params(self, params):
         start =  params.get("start",  params.get("starttime", None))
