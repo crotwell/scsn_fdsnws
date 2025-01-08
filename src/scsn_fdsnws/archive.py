@@ -1,5 +1,5 @@
 import datetime
-import simpledali
+import simplemseed
 import pathlib
 import re
 import cherrypy
@@ -50,7 +50,7 @@ class RingserverArchive(object):
                         bytedata = infile.read(512)
                         if (len(bytedata) < 512):
                             break
-                        msr = simpledali.unpackMiniseedRecord(bytedata)
+                        msr = simplemseed.unpackMiniseedRecord(bytedata)
 
                         if not (msr.starttime() > endtime or msr.endtime() < starttime):
                             outbytes.append(bytedata)
