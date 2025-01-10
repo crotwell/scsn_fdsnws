@@ -24,6 +24,7 @@ class RingserverArchive(object):
         filelist = []
         while search_hour < end:
             filelist.append(search_hour.strftime(pattern))
+            search_hour = search_hour.replace(microsecond=0, second=0, minute=0)
             search_hour += hour
         return filelist
     def validate(self, net, sta, loc, chan, starttime, endtime):
