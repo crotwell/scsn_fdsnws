@@ -45,8 +45,9 @@ class DataSelectWebService(object):
                 status = 204
 
             url = cherrypy.url(qs=cherrypy.request.query_string)
-            self.form_error_html(status, f"<h3>No data found for request:</h3>\n")
-
+            html, s = self.form_nodata_html(status, f"<h3>No data found for request:</h3>\n")
+            cherrypy.response.status = s
+            return html
 
     @cherrypy.tools.accept(media='application/vnd.fdsn.mseed')
     def POST(self, **params):
@@ -94,6 +95,13 @@ class DataSelectWebService(object):
         """
         url = cherrypy.url(qs=cherrypy.request.query_string)
         raise FDSNWSError(status_code, f"<h3>Error</h3>\n{html_msg}\n<a href={url}>{url}</a>" )
+
+    def form_nodata_html(self, status_code, html_msg):
+        """
+        returns length 2 tuple with html, status_code
+        """
+        url = cherrypy.url(qs=cherrypy.request.query_string)
+        return f"<h3>Error</h3>\n{html_msg}\n<a href={url}>{url}</a>", status_code
 
     def filize_datetime(self, d):
         return d.strftime('%y-%m-%dT%H%M%S')
