@@ -57,7 +57,7 @@ class RingserverArchive(object):
                                 outbytes.append(bytedata)
                 except simplemseed.MiniseedException as e:
                     cherrypy.log(f"possible corrupt file, skipping: {f}")
-                    cherrypy.log(e)
+                    cherrypy.log(str(e))
         return outbytes
 
 
