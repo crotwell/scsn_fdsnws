@@ -45,15 +45,19 @@ class RingserverArchive(object):
             if not f.parent.parent.exists():
                 raise Exception(f"Data dir for {f} doesn't exist!")
             if f.exists():
-                with open(f, "rb") as infile:
-                    while True:
-                        bytedata = infile.read(512)
-                        if (len(bytedata) < 512):
-                            break
-                        msr = simplemseed.unpackMiniseedRecord(bytedata)
+                try:
+                    with open(f, "rb") as infile:
+                        while True:
+                            bytedata = infile.read(512)
+                            if (len(bytedata) < 512):
+                                break
+                            msr = simplemseed.unpackMiniseedRecord(bytedata)
 
-                        if not (msr.starttime() > endtime or msr.endtime() < starttime):
-                            outbytes.append(bytedata)
+                            if not (msr.starttime() > endtime or msr.endtime() < starttime):
+                                outbytes.append(bytedata)
+                except simplemseed.MiniseedException as e:
+                    cherrypy.log(f"possible corrupt file, skipping: {f}")
+                    cherrypy.log(e)
         return outbytes
 
 
