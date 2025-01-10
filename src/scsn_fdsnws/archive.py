@@ -43,8 +43,6 @@ class RingserverArchive(object):
         for mseedfile in file_list:
             f = pathlib.Path(mseedfile)
             cherrypy.log(f"load from {f}")
-            if not f.parent.parent.exists():
-                raise Exception(f"Data dir for {f} doesn't exist!")
             if f.exists():
                 try:
                     with open(f, "rb") as infile:
