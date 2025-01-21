@@ -19,12 +19,11 @@ class RingserverArchive(object):
         pattern = pattern.replace("%s", sta)
         pattern = pattern.replace("%l", loc)
         pattern = pattern.replace("%c", chan)
-        search_hour = start
+        search_hour = start.replace(microsecond=0, second=0, minute=0)
         hour = datetime.timedelta(hours=1)
         filelist = []
         while search_hour < end:
             filelist.append(search_hour.strftime(pattern))
-            search_hour = search_hour.replace(microsecond=0, second=0, minute=0)
             search_hour += hour
         return filelist
     def validate(self, net, sta, loc, chan, starttime, endtime):
